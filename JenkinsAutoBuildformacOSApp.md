@@ -28,6 +28,7 @@ if os.path.isfile(plistPath):
 sign的時候會需要keychain，要先解鎖、exportArchive時需要exportOptions，可以參照App文件建立，或者先用XCode app archive輸出App一次，會順便生成ExportOptions.plist
 
 ref: https://www.jianshu.com/p/e691a81d576c
+ref: https://www.jianshu.com/p/e691a81d576c
 
 ```bash
 mkdir "build"
@@ -44,6 +45,7 @@ xcodebuild -archivePath "./build/APP.xcarchive" -exportArchive -exportPath "buil
 建立dmg請見( https://ss64.com/osx/hdiutil.html )
 
 `cp -R`/`cp -r`為不同命令，需要注意，若採用`cp -r`會產生sign錯誤的結果
+
 ref: https://unix.stackexchange.com/questions/18712/difference-between-cp-r-and-cp-r-copy-command#comment104877_18718
 ref: https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPFrameworks/Concepts/FrameworkAnatomy.html#//apple_ref/doc/uid/20002253-99920-BAJFEJFI
 ```bash
