@@ -1,4 +1,4 @@
-# NSLogger在Swift環境下的行為
+# NSLogger在發佈後的行為
 [NSLogger](https://github.com/fpillet/NSLogger)
 
 最近有個案子為了debug logging方便，放棄了過去的自製Logger跟XCGLogger；改採用了NSLogger，有client app方便發版之後去檢視log。
