@@ -3,8 +3,11 @@
 ## Decode
 ### NALU
 Ref: [stackoverflow](https://stackoverflow.com/questions/28396622/extracting-h264-from-cmblockbuffer)
+
+一個NALU SLICE排序應該如下
+`[nalu header(4bits)]` `[type(2bytes)]` `[first_mb_in_slice(1bit)]`
 ```
-[header(4bytes)]` `[type(2bytes)]` `[mb-slide(1bit)]
+Type
 +---------------+ 
 |0|1|2|3|4|5|6|7| 
 +-+-+-+-+-+-+-+-+ 
@@ -12,7 +15,7 @@ Ref: [stackoverflow](https://stackoverflow.com/questions/28396622/extracting-h26
 +---------------+
 ```
 *trans header from BigEndian to Little (TCP:Big / AppleCPU:Little)*
-#### header - 1/2/4 bytes ,AVCC format
+#### header - 3/4 bits ,AVCC format
 ```
 (00 00 00 01) [hex]
 ```
@@ -23,7 +26,7 @@ bit 0 -> forbidden zero
 bit 1~3 -> ref
 bit 4~5 -> unit type (total 24 type)
 ```
-#### mb-slice - 1 bit
+#### first_mb_in_slice - 1 bit
 ```
 0 -> first
 1 -> multi
