@@ -1,4 +1,12 @@
 # Install Kext in App on OSX
+## 2019/Jul更新
+更新一些最近碰到的事情，加入`login item daemon`與`chmod`的script
+- Clean Install? 如何完全移除daemon/kext?
+- 正確的chmod?
+#### 安裝Kext 是否需要`chmod`與重開機
+原先在測試的時候一直使用同一台測試機，換到其他的機器就會發生問題
+用PKG Installer反而沒問題（login item自動啟動的daemon也有同樣問題）
+交叉驗證後確認是clean install的時候一定要`chmod`與`重開機`
 
 ## 目的
 原先安裝Kext是藉由PKG包裝去達成Kext安裝目的
@@ -18,7 +26,7 @@ pkgbuild --root /tmp/mykext --component-plist "${BUILT_PRODUCTS_DIR}/$KEXT_PLIST
 - 安裝Kext
 
 ## 實作
-這邊要先想要用什麼方式來執行Script，一般而言比較方便取得的有兩種方案，`NSAppleScript(AppleScript)`跟`NSTask(Bash)`；在取得權限的操作方面，AppleScirpt有較方便的方式，故此處採用AppleScript。
+這邊先確認要用什麼方式來執行Script，一般而言比較方便的有兩種方案，`NSAppleScript(AppleScript)`跟`NSTask(Bash)`；在取得權限的操作方面，AppleScirpt有較方便的方式，故此處採用AppleScript。
 
 #### 檢查是否已安裝Kext
 利用kextstat跟grep取得是否安裝，如已安裝則會得到`<NSAppleEventDescriptor: 'utxt'("INSTALLED")>` result
@@ -141,4 +149,94 @@ let uninstall = """
   do shell script "sudo rm -rf /Library/Receipts/\(kextBundleID).*" with administrator privileges
   do shell script "sudo rm -rf /var/db/receipts/\(kextBundleID).*" with administrator privileges
 """
+```
+
+
+##### Clean Install? 如何完全移除daemon/kext?
+移除app（含daemon部分）
+```shell
+sudo killall -c $APP
+sudo rm -rf /Library/LaunchAgents/$BUNDLE_ID
+sudo rm -rf /Library/LaunchDaemons/$BUNDLE_ID
+sudo rm -rf /Library/Application\ Support/$APP
+sudo rm -rf ~/Library/Preferences/$BUNDLE_ID
+sudo rm -rf /System/Library/CoreServices/$APP
+sudo rm -rf /var/tmp/$BUNDLE_ID
+```
+
+移除kext
+```shell
+sudo kextunload /System/Library/Extensions/$KEXT.kext
+sudo rm -rf /System/Library/Extensions/$KEXT.kext
+sudo rm -rf /Library/Receipts/$PKG.pkg
+sudo touch /System/Library/Extensions
+```
+
+#### 正確的chmod?
+app (daemon)
+
+chmod app本身
+```shell
+sudo chmod -R 777 "$PATH/$APP.app"
+sudo chmod -R 777 "$PATH/$LOGIN_HELPER.app"
+sleep 1
+sudo chown -R root:wheel "$PATH/$APP.app"
+sudo chown -R root:wheel "$PATH/$LOGIN_HELPER.app"
+```
+
+建立lanchctl/plist
+```shell
+# Write plist file.
+sudo echo '<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>'$BUNDLE_ID'</string>
+    <key>Program</key>
+    <string>'$PATH/$APP.app/Contents/MacOS/$LOGIN_HELPER'</string>
+    <key>RunAtLoad</key>
+    <true/>
+</dict>
+</plist>' > "$LOGIN_HELPER_PLIST"
+
+
+sudo chown -R root:wheel $LOGIN_HELPER_PLIST
+sleep 1
+sudo chmod -R 555 $LOGIN_HELPER_PLIST
+
+# Load
+/bin/launchctl unload "$LOGIN_HELPER_PLIST"
+/bin/launchctl load "$LOGIN_HELPER_PLIST"
+
+open -a "$ROOT_PATH/$APP.app"
+
+
+# Check daemon is loaded.
+STATUS=`/bin/launchctl list | /usr/bin/grep -w $DAEMON_ID | /usr/bin/awk '{print $3}'`
+
+
+if [ "$STATUS" == "$DAEMON_ID" ]; then
+        echo "Success: loaded."
+        #exit 0      
+else
+        echo "Error: not loaded."      
+        #exit 1
+fi
+```
+Kext
+```shell
+
+sudo chmod -R 755 /System/Library/Extensions/$KEXT.kext
+sleep 1
+sudo chown -R root:wheel /System/Library/Extensions/$KEXT.kext
+sudo chmod 644 /System/Library/Extensions/$KEXT.kext/Contents/Info.plist
+sudo chmod 644 /System/Library/Extensions/$KEXT.kext/Contents/_CodeSignature/CodeResources
+
+sudo kextcache -system-prelinked-kernel
+sudo kextcache -system-caches
+
+sudo touch /System/Library/Extensions
+
+sudo kextload /System/Library/Extensions/$KEXT.kext
 ```
