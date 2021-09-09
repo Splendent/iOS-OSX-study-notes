@@ -5,7 +5,7 @@
 Ref: [stackoverflow](https://stackoverflow.com/questions/28396622/extracting-h264-from-cmblockbuffer)
 
 一個NALU SLICE排序應該如下
-`[nalu header(4bits)]` `[type(2bytes)]` `[first_mb_in_slice(1bit)]`
+`[nalu header(4bits)]` `[first_mb_in_slice(1bit)]` `[type(2bytes)]` 
 ```
 Type
 +---------------+ 
@@ -19,6 +19,12 @@ Type
 ```
 (00 00 00 01) [hex]
 ```
+#### first_mb_in_slice - 1 bit
+```
+0 -> first
+1 -> multi
+```
+ref: https://blog.csdn.net/huanggang982/article/details/37929905
 #### type - 2 bytes
 ```
 (0000 0000)
@@ -26,12 +32,6 @@ bit 0 -> forbidden zero
 bit 1~3 -> ref
 bit 4~5 -> unit type (total 24 type)
 ```
-#### first_mb_in_slice - 1 bit
-```
-0 -> first
-1 -> multi
-```
-ref: https://blog.csdn.net/huanggang982/article/details/37929905
 **Result -> CMSampleBufferCreate -> AVSamplebufferLayer**
 
 # Encode
