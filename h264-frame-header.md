@@ -31,6 +31,7 @@ bit 4~5 -> unit type (total 24 type)
 0 -> first
 1 -> multi
 ```
+ref: https://blog.csdn.net/huanggang982/article/details/37929905
 **Result -> CMSampleBufferCreate -> AVSamplebufferLayer**
 
 # Encode
