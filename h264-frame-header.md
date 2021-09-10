@@ -4,6 +4,7 @@
 ### NALU
 Ref: [stackoverflow](https://stackoverflow.com/questions/28396622/extracting-h264-from-cmblockbuffer)
 
+# AnnexB
 一個NALU SLICE排序應該如下
 `[nalu header(4bits)]` `[first_mb_in_slice(1bit)]` `[type(2bytes)]` 
 ```
@@ -19,19 +20,31 @@ Type
 ```
 (00 00 00 01) [hex]
 ```
-#### first_mb_in_slice - 1 bit
+#### type - 2 bytes
+##### first_mb_in_slice - 1 bit
 ```
 0 -> first
 1 -> multi
 ```
 ref: https://blog.csdn.net/huanggang982/article/details/37929905
-#### type - 2 bytes
 ```
 (0000 0000)
 bit 0 -> forbidden zero
 bit 1~3 -> ref
 bit 4~5 -> unit type (total 24 type)
 ```
+
+
+# AVCC
+```
+([extradata]) | ([length] NALU) | ([length] NALU) |
+```
+
+In annexb, [start code] may be 0x000001 or 0x00000001.
+
+In avcc, the bytes of [length] depends on NALULengthSizeMinusOne in avcc extradata, the value of [length] depends on the size of following NALU and in both annexb and avcc format, the NALUs are no different.
+
+Ref: [StackOverflow](https://stackoverflow.com/questions/23404403/need-to-convert-h264-stream-from-annex-b-format-to-avcc-format)
 **Result -> CMSampleBufferCreate -> AVSamplebufferLayer**
 
 # Encode
