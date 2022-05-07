@@ -62,3 +62,6 @@ NSMutableData * data = [[NSMutableData alloc] initWithBytes:sampledata length:bu
 [data replaceBytesInRange:NSMakeRange(offset, 4) withBytes:nal length:4];
 ```
 ​
+AnnexB vs AVCC
+https://www.796t.com/content/1548281013.html
+https://blog.csdn.net/easyhao007/article/details/109852898
