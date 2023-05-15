@@ -7,6 +7,20 @@
 原本是利用Jenkins自帶的XCode plugin去建置，但是出來的App用`codesign -dv`去檢查發現沒有確實的Sign。於是改採用直接下`xcodebuild`命令的方式
 
 ### version
+#### sed
+```
+#versioning, fuck agvtool, 2023
+sed -i '' -e "s/MARKETING_VERSION \= [^\;]*\;/MARKETING_VERSION = ${SHORT_VERSION};/" {PROJECT}.xcodeproj/project.pbxproj
+sed -i '' -e "s/CURRENT_PROJECT_VERSION \= [^\;]*\;/CURRENT_PROJECT_VERSION = ${TECHNICAL_VERSION_NUMBER};/" {PROJECT}.xcodeproj/project.pbxproj
+```
+*下列方法已經失效，目前apple新開的專案版本依據極其怪異*
+目前僅確認在XCode IDE內輸入的可以有效更新版本號
+#### agvtool
+正規來說應該要用[agvtool](https://developer.apple.com/library/archive/qa/qa1827/_index.html)
+但是apple的老樣子，出包
+https://stackoverflow.com/questions/11737325/agvtool-new-version-and-what-version-do-not-correspond
+https://stackoverflow.com/questions/72558951/agvtool-new-marketing-version-doesnt-work-on-xcode-13
+#### python
 版號設定這邊採用python的plist lib去處理；
 
 ```python
