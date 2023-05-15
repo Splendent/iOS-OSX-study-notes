@@ -58,6 +58,9 @@ hdiutil create -fs HFS+ -srcfolder "dmg" -volname "APP" "APP.dmg"
 ```
 
 ### 其他
+
+[Notarize](2023MacOSAppDistributionInDMG.md)
+
 codesign 驗證
 ```
 codesign -dv APP.app
